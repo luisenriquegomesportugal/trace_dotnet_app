@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
@@ -21,28 +23,48 @@ namespace TraceApp
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Obtém o endpoint do coletor OTLP da variável de ambiente ou usa o valor padrão
             var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_OTLP_ENDPOINT") ?? "http://localhost:4317";
 
             services.AddLogging(logging =>
             {
-                logging.ClearProviders(); // Remove provedores padrão
-                logging.AddConsole();    // Adiciona saída no console
-                logging.AddDebug();      // Adiciona saída no Debug
-                logging.SetMinimumLevel(LogLevel.Trace); // Define nível de log mínimo
-            });
-
-            services.AddOpenTelemetry()
-                .WithTracing(builder =>
+                logging.ClearProviders(); 
+                logging.AddConsole(); 
+                logging.AddDebug();    
+                logging.SetMinimumLevel(LogLevel.Error);
+                logging.AddOpenTelemetry(options =>
                 {
-                    builder
+                    options
                         .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("TraceApp"))
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
+                        .AddConsoleExporter()
                         .AddOtlpExporter(options =>
                         {
                             options.Endpoint = new Uri(otlpEndpoint);
                         });
+                });
+
+            });
+
+            services.AddOpenTelemetry()
+                .ConfigureResource(resource => resource.AddService("TraceApp"))
+                .WithTracing(tracing =>
+                {
+                    tracing
+                    .AddAspNetCoreInstrumentation()
+                    .AddConsoleExporter()
+                    .AddOtlpExporter(exporter =>
+                    {
+                        exporter.Endpoint = new Uri(otlpEndpoint);
+                    });
+                })
+                .WithMetrics(metrics =>
+                {
+                    metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddConsoleExporter()
+                    .AddOtlpExporter(exporter =>
+                    {
+                        exporter.Endpoint = new Uri(otlpEndpoint);
+                    });
                 });
 
             services.AddHttpClient();

@@ -18,13 +18,6 @@ namespace TraceApp
                 {
                     config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
                 })
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.AddConsole();
-                    logging.AddDebug();
-                    logging.SetMinimumLevel(LogLevel.Trace);
-                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
