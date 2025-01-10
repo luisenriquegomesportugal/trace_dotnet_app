@@ -44,7 +44,7 @@ namespace TraceApp
                 {
                     tracing
                     .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("TraceApp"))
-                    .AddSource("MyCustomTracer")
+                    .AddSource("TraceApp.MyCustomTracer")
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddConsoleExporter()

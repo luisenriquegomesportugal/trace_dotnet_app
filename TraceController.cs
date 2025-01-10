@@ -16,11 +16,11 @@ namespace TraceApp
         public TraceController(IHttpClientFactory httpClientFactory, TracerProvider tracerProvider)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _tracer = tracerProvider.GetTracer("MyCustomTracer");
+            _tracer = tracerProvider.GetTracer("TraceApp.MyCustomTracer");
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTrace()
+        public IActionResult GetTrace()
         {
             using (var span = _tracer.StartActiveSpan("TrackOperation"))
             {
@@ -28,15 +28,7 @@ namespace TraceApp
                 span.SetAttribute("http.method", "GET");
                 span.SetAttribute("http.url", "https://jsonplaceholder.typicode.com/posts/1");
 
-
-                // Simule alguma operação
-                var externalUrl = "https://jsonplaceholder.typicode.com/posts/1";
-                var response = await _httpClient.GetAsync(externalUrl);
-                response.EnsureSuccessStatusCode();
-
-                var responseBody = await response.Content.ReadAsStringAsync();
-
-                return Ok(new { responseBody, status = "OK" });
+                return Ok(new { Status = "OK" });
 
             }
         }
