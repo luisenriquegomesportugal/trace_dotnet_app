@@ -19,17 +19,41 @@ namespace TraceApp
         [HttpGet]
         public async Task<IActionResult> GetTrace()
         {
+            var internalResponseBody = "";
+            var externalResponseBody = "";
+
+            var callExternal = Boolean.Parse(Environment.GetEnvironmentVariable("TRACE_APP_EXTERNAL_CALL"));
+
             // Internal API Call
             var internalUrl = "http://companhias-api-openbanking-services-hml.apps.ocp.desenv.com/open-banking/companies/v1";
             var internalResponse = await _httpClient.GetAsync(internalUrl);
 
-            var internalResponseBody = "error";
             if (internalResponse.IsSuccessStatusCode)
             {
                 internalResponseBody = await internalResponse.Content.ReadAsStringAsync();
             }
+            else
+            {
+                internalResponseBody = "error";
+            }
 
-            return Ok(new { internalResponseBody, status = "OK" });
+            if (callExternal)
+            {
+                // External API Call
+                var externalUrl = "http://companhias-api-openbanking-services-hml.apps.ocp.desenv.com/open-banking/companies/v1";
+                var externalResponse = await _httpClient.GetAsync(externalUrl);
+
+                if (externalResponse.IsSuccessStatusCode)
+                {
+                    externalResponseBody = await externalResponse.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    externalResponseBody = "error";
+                }
+            }
+
+            return Ok(new { internalResponseBody, externalResponseBody, status = "OK" });
         }
     }
 }
