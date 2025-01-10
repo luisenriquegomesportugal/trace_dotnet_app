@@ -11,9 +11,9 @@ namespace TraceApp
     {
         private readonly HttpClient _httpClient;
 
-        public TraceController(IHttpClientFactory httpClientFactory)
+        public TraceController()
         {
-            _httpClient = httpClientFactory.CreateClient();
+            _httpClient = new HttpClient(new HttpClientHandler());
         }
 
         [HttpGet]
