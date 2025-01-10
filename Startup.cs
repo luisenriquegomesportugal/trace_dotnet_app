@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -18,15 +19,16 @@ namespace TraceApp
     {
         private readonly IConfiguration _configuration;
 
+        private readonly string _otlpEndpoint;
+
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
+            _otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_OTLP_ENDPOINT") ?? "http://localhost:4317";
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_OTLP_ENDPOINT") ?? "http://localhost:4317";
-
             services.AddLogging(logging =>
             {
                 logging.ClearProviders(); 
@@ -41,27 +43,12 @@ namespace TraceApp
                 {
                     tracing
                     .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
                     .AddConsoleExporter()
                     .AddOtlpExporter(exporter =>
                     {
-                        exporter.Endpoint = new Uri(otlpEndpoint);
-                        exporter.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                        exporter.HttpClientFactory = () => new HttpClient(
-                            new HttpClientHandler
-                            {
-                                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                            });
-                    });
-                })
-                .WithMetrics(metrics =>
-                {
-                    metrics
-                    .AddAspNetCoreInstrumentation()
-                    .AddConsoleExporter()
-                    .AddOtlpExporter(exporter =>
-                    {
-                        exporter.Endpoint = new Uri(otlpEndpoint);
-                        exporter.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        exporter.Endpoint = new Uri(this._otlpEndpoint);
+                        exporter.Protocol = OtlpExportProtocol.Grpc;
                         exporter.HttpClientFactory = () => new HttpClient(
                             new HttpClientHandler
                             {
@@ -89,6 +76,7 @@ namespace TraceApp
             });
 
             logger.LogInformation("Application started and running in {Environment} environment", env.EnvironmentName);
+            logger.LogInformation("Application connected on Grpc {Host} environment", this._otlpEndpoint);
         }
     }
 }
