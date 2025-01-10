@@ -22,8 +22,7 @@ namespace TraceApp
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                    .UseStartup<Startup>()
-                    .UseKestrel(o => { o.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10); });
+                    .UseStartup<Startup>();
                 });
     }
 }
