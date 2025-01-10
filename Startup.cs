@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -48,12 +49,10 @@ namespace TraceApp
                     .AddOtlpExporter(exporter =>
                     {
                         exporter.Endpoint = new Uri(this._otlpEndpoint);
-                        exporter.Protocol = OtlpExportProtocol.Grpc;
-                        exporter.HttpClientFactory = () => new HttpClient(
-                            new HttpClientHandler
-                            {
-                                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                            });
+                        exporter.HttpClientFactory = () => new HttpClient(new SocketsHttpHandler
+                        {
+                            UseProxy = false
+                        });
                     });
                 });
 
