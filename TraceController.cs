@@ -2,7 +2,6 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using OpenTelemetry.Trace;
 
 namespace TraceApp
 {
@@ -11,25 +10,22 @@ namespace TraceApp
     public class TraceController : ControllerBase
     {
         private readonly HttpClient _httpClient;
-        private readonly Tracer _tracer;
 
-        public TraceController(IHttpClientFactory httpClientFactory, TracerProvider tracerProvider)
+        public TraceController(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _tracer = tracerProvider.GetTracer("TraceApp.TraceController");
         }
 
         [HttpGet]
-        public IActionResult GetTrace()
+        public async Task<IActionResult> GetTrace()
         {
-            using (var span = _tracer.StartActiveSpan("GetTrace"))
-            {
-                // Defina atributos ou outros detalhes no span
-                span.SetAttribute("http.method", "GET");
-                span.SetAttribute("http.url", "https://jsonplaceholder.typicode.com/posts/1");
+            var externalUrl = "https://jsonplaceholder.typicode.com/posts/1";
+            var response = await _httpClient.GetAsync(externalUrl);
+            response.EnsureSuccessStatusCode();
 
-                return Ok(new { Status = "OK" });
-            }
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            return Ok(new { responseBody, status = "OK" });
         }
     }
 }
