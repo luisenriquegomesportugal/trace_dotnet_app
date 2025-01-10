@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -38,10 +40,11 @@ namespace TraceApp
             });
 
             services.AddOpenTelemetry()
-                .ConfigureResource(resource => resource.AddService("TraceApp"))
                 .WithTracing(tracing =>
                 {
                     tracing
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("TraceApp"))
+                    .AddSource("MyCustomTracer")
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddConsoleExporter()
