@@ -49,6 +49,12 @@ namespace TraceApp
                     {
                         exporter.Endpoint = new Uri(this._otlpEndpoint);
                         exporter.Protocol = OtlpExportProtocol.HttpProtobuf;
+                        exporter.HttpClientFactory = () => new HttpClient(
+                            new HttpClientHandler
+                            {
+                                UseProxy = false,
+                                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                            });
                     });
                 });
 
