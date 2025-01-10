@@ -29,7 +29,6 @@ namespace TraceApp
                 span.SetAttribute("http.url", "https://jsonplaceholder.typicode.com/posts/1");
 
                 return Ok(new { Status = "OK" });
-
             }
         }
     }
