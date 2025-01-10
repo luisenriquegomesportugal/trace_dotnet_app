@@ -13,8 +13,10 @@ namespace TraceApp
 
         public TraceController(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient();
-            _httpClient.Timeout = TimeSpan.FromSeconds(10);
+            _httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(10)
+            };
         }
 
         [HttpGet]
