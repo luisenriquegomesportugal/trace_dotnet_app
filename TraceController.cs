@@ -13,25 +13,12 @@ namespace TraceApp
 
         public TraceController(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(10)
-            };
+            _httpClient = new HttpClient { };
         }
 
         [HttpGet]
         public async Task<IActionResult> GetTrace()
         {
-            // External API Call
-            var externalUrl = "https://jsonplaceholder.typicode.com/posts/1";
-            var externaResponse = await _httpClient.GetAsync(externalUrl);
-
-            var externalResponseBody = "error";
-            if (externaResponse.IsSuccessStatusCode)
-            {
-                externalResponseBody = await externaResponse.Content.ReadAsStringAsync();
-            }
-
             // Internal API Call
             var internalUrl = "http://companhias-api-openbanking-services-hml.apps.ocp.desenv.com/open-banking/companies/v1";
             var internalResponse = await _httpClient.GetAsync(internalUrl);
