@@ -29,7 +29,7 @@ namespace TraceApp
                 internalResponseBody = await internalResponse.Content.ReadAsStringAsync();
             }
 
-            return Ok(new { internalResponseBody, externalResponseBody, status = "OK" });
+            return Ok(new { internalResponseBody, status = "OK" });
         }
     }
 }
