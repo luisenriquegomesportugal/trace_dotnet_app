@@ -22,7 +22,7 @@ namespace TraceApp
             var internalResponseBody = "";
             var externalResponseBody = "";
 
-            var callExternal = Boolean.Parse(Environment.GetEnvironmentVariable("TRACE_APP_EXTERNAL_CALL"));
+            var callExternal = Environment.GetEnvironmentVariable("TRACE_APP_EXTERNAL_CALL");
 
             // Internal API Call
             var internalUrl = "http://companhias-api-openbanking-services-hml.apps.ocp.desenv.com/open-banking/companies/v1";
@@ -37,12 +37,10 @@ namespace TraceApp
                 internalResponseBody = "error";
             }
 
-            if (callExternal)
+            if (callExternal != null)
             {
                 // External API Call
-                var externalUrl = "http://companhias-api-openbanking-services-hml.apps.ocp.desenv.com/open-banking/companies/v1";
-                var externalResponse = await _httpClient.GetAsync(externalUrl);
-
+                var externalResponse = await _httpClient.GetAsync(callExternal);
                 if (externalResponse.IsSuccessStatusCode)
                 {
                     externalResponseBody = await externalResponse.Content.ReadAsStringAsync();
