@@ -1,6 +1,5 @@
 using System;
 using System.Net.Http;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -49,10 +48,13 @@ namespace TraceApp
                     .AddOtlpExporter(exporter =>
                     {
                         exporter.Endpoint = new Uri(this._otlpEndpoint);
-                        exporter.HttpClientFactory = () => new HttpClient(new SocketsHttpHandler
-                        {
-                            UseProxy = false
-                        });
+                        exporter.Protocol = OtlpExportProtocol.Grpc;
+                        exporter.HttpClientFactory = () => new HttpClient(
+                            new HttpClientHandler
+                            {
+                                UseProxy = false,
+                                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                            });
                     });
                 });
 
@@ -75,7 +77,7 @@ namespace TraceApp
             });
 
             logger.LogInformation("Application started and running in {Environment} environment", env.EnvironmentName);
-            logger.LogInformation("Application connected on Grpc {Host} environment", this._otlpEndpoint);
+            logger.LogInformation("Application connected on Grpc host {Host}", this._otlpEndpoint);
         }
     }
 }
