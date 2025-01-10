@@ -9,13 +9,20 @@ namespace TraceApp
     [Route("[controller]")]
     public class TraceController : ControllerBase
     {
+        private readonly HttpClient _httpClient;
+
+        public TraceController(IHttpClientFactory httpClientFactory)
+        {
+            _httpClient = httpClientFactory.CreateClient();
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetTrace()
         {
-            var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync("https://jsonplaceholder.typicode.com/posts/1");
-
+            var externalUrl = "https://jsonplaceholder.typicode.com/posts/1";
+            var response = await _httpClient.GetAsync(externalUrl);
             response.EnsureSuccessStatusCode();
+
             var responseBody = await response.Content.ReadAsStringAsync();
 
             return Ok(new { responseBody, status = "OK" });

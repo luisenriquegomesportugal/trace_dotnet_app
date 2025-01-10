@@ -30,12 +30,6 @@ namespace TraceApp
         {
             var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_OTLP_ENDPOINT") ?? "http://localhost:4317";
 
-            var httpClient = new HttpClient(new HttpClientHandler
-            {
-                Proxy = null, 
-                UseProxy = false
-            });
-
             services.AddLogging(logging =>
             {
                 logging.ClearProviders(); 
@@ -61,7 +55,6 @@ namespace TraceApp
 
             services.AddHttpClient();
             services.AddControllers();
-            services.AddSingleton(httpClient);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
