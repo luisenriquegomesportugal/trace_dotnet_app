@@ -21,16 +21,15 @@ namespace TraceApp
     {
         private readonly IConfiguration _configuration;
 
-        private readonly string _otlpEndpoint;
-
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
-            _otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_OTLP_ENDPOINT") ?? "http://localhost:4317";
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var otlpEndpoint = Environment.GetEnvironmentVariable("OTEL_OTLP_ENDPOINT") ?? "http://localhost:4317"; 
+
             services.AddLogging(logging =>
             {
                 logging.ClearProviders(); 
@@ -44,13 +43,12 @@ namespace TraceApp
                 {
                     tracing
                     .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("TraceApp"))
-                    .AddSource("TraceApp.MyCustomTracer")
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddConsoleExporter()
                     .AddOtlpExporter(exporter =>
                     {
-                        exporter.Endpoint = new Uri(this._otlpEndpoint);
+                        exporter.Endpoint = new Uri(otlpEndpoint);
                     });
                 });
 
@@ -73,7 +71,7 @@ namespace TraceApp
             });
 
             logger.LogInformation("Application started and running in {Environment} environment", env.EnvironmentName);
-            logger.LogInformation("Application connected on Grpc host {Host}", this._otlpEndpoint);
+            logger.LogInformation("Application connected on Grpc host");
         }
     }
 }

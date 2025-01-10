@@ -16,13 +16,13 @@ namespace TraceApp
         public TraceController(IHttpClientFactory httpClientFactory, TracerProvider tracerProvider)
         {
             _httpClient = httpClientFactory.CreateClient();
-            _tracer = tracerProvider.GetTracer("TraceApp.MyCustomTracer");
+            _tracer = tracerProvider.GetTracer("TraceApp.TraceController");
         }
 
         [HttpGet]
         public IActionResult GetTrace()
         {
-            using (var span = _tracer.StartActiveSpan("TrackOperation"))
+            using (var span = _tracer.StartActiveSpan("GetTrace"))
             {
                 // Defina atributos ou outros detalhes no span
                 span.SetAttribute("http.method", "GET");
