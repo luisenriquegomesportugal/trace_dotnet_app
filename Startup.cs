@@ -1,10 +1,12 @@
 using System;
+using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -30,18 +32,7 @@ namespace TraceApp
                 logging.ClearProviders(); 
                 logging.AddConsole(); 
                 logging.AddDebug();    
-                logging.SetMinimumLevel(LogLevel.Error);
-                logging.AddOpenTelemetry(options =>
-                {
-                    options
-                        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("TraceApp"))
-                        .AddConsoleExporter()
-                        .AddOtlpExporter(options =>
-                        {
-                            options.Endpoint = new Uri(otlpEndpoint);
-                        });
-                });
-
+                logging.SetMinimumLevel(LogLevel.Debug);
             });
 
             services.AddOpenTelemetry()
@@ -54,6 +45,12 @@ namespace TraceApp
                     .AddOtlpExporter(exporter =>
                     {
                         exporter.Endpoint = new Uri(otlpEndpoint);
+                        exporter.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        exporter.HttpClientFactory = () => new HttpClient(
+                            new HttpClientHandler
+                            {
+                                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                            });
                     });
                 })
                 .WithMetrics(metrics =>
@@ -64,6 +61,12 @@ namespace TraceApp
                     .AddOtlpExporter(exporter =>
                     {
                         exporter.Endpoint = new Uri(otlpEndpoint);
+                        exporter.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        exporter.HttpClientFactory = () => new HttpClient(
+                            new HttpClientHandler
+                            {
+                                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                            });
                     });
                 });
 
